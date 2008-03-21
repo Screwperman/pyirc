@@ -6,11 +6,18 @@
 class EncodeArgumentError(Exception):
     """Given arguments cannot be encoded as an IRC message."""
 
+def _utf8ize(data):
+    if isinstance(data, unicode):
+        return data.encode('utf-8')
+    else:
+        return data
+
 def encode(command, *args):
     command = command.upper()
     if len(args) == 0:
         return '%s\r\n' % command
     else:
+        args = [_utf8ize(x) for x in args]
         for arg in args[:-1]:
             if ' ' in arg:
                 raise EncodeArgumentError
