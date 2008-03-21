@@ -1,7 +1,7 @@
 # Unit tests for wireproto
 
 import unittest
-import wireproto
+from myirc import wireproto
 
 class TestWireproto(unittest.TestCase):
     def testEncoding(self):
