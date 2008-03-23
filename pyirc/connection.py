@@ -15,13 +15,14 @@ class _ConnectionDispatcher(asyncore.dispatcher):
     class namespace, because asyncore defines a fair amount of methods
     and data we risk stepping on.
     """
-    def __init__(self, host, port, ext_handler):
-        asyncore.dispatcher.__init__(self)
-        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connect((host, port))
+    def __init__(self, host, port, ext_handler, ext_sock=None):
+        asyncore.dispatcher.__init__(self, sock=ext_sock)
         self.send_buffer = []
         self.recv_buffer = []
         self.ext_handler = ext_handler
+        if not ext_sock:
+            self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.connect((host, port))
 
     def output(self, data):
         self.send_buffer.append(data)
@@ -70,7 +71,7 @@ class _ConnectionDispatcher(asyncore.dispatcher):
             self.send_buffer = []
 
 
-class Connection(object):
+class Server(object):
     def __init__(self, host, port, nick, user, realname='nobody',
                  _conn_class=_ConnectionDispatcher):
         self._conn = _conn_class(host, port, self)
