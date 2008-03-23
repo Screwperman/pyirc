@@ -242,3 +242,12 @@ class ServerCapabilities(object):
                     raise CapabilityValueError('MODES', v)
             self._modes = v
         return locals()
+
+    _network = None
+    @_mkproperty('NETWORK')
+    def network():
+        def fset(self, v):
+            if not v:
+                raise CapabilityValueError('NETWORK', v)
+            self._network = v
+        return locals()

@@ -323,3 +323,24 @@ class TestServerCapabilities(unittest.TestCase):
         # Deletion restores default
         del c.modes
         self.assertEquals(c.modes, 3)
+
+    def testNetwork(self):
+        c = scap.ServerCapabilities()
+
+        # No default value
+        self.assertEquals(c.network, None)
+
+        # Setting no value fails
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'network', '')
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'network', None)
+
+        # Setting values is cool
+        c.network = 'bleh'
+        self.assertEquals(c.network, 'bleh')
+        c.network = 'freenode'
+        self.assertEquals(c.network, 'freenode')
+
+        # No deletion
+        self.assertRaises(AttributeError, delattr, c, 'network')
