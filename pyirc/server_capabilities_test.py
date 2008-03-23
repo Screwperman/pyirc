@@ -133,6 +133,9 @@ class TestServerCapabilities(unittest.TestCase):
                            scap.CHANMODE_NO_PARAM: frozenset(['g', 'h'])})
         del c.invex
 
+        c.maxlist = 'ab:100'
+        self.assertRaises(
+            scap.CapabilityLogicError, setattr, c, 'chanmodes', ',,,')
 
     def testChannellen(self):
         c = scap.ServerCapabilities()
@@ -260,3 +263,39 @@ class TestServerCapabilities(unittest.TestCase):
 
         # No default value, so no deletion possible.
         self.assertRaises(AttributeError, delattr, c, 'kicklen')
+
+    def testMaxlist(self):
+        c = scap.ServerCapabilities()
+
+        # No default value
+        self.assertEquals(c.maxlist, None)
+
+        # Set values
+        c.maxlist = 'b:100,e:200,I:150'
+        self.assertEquals(c.maxlist, {frozenset(['b']): 100,
+                                      frozenset(['e']): 200,
+                                      frozenset(['I']): 150})
+        c.maxlist = 'beI: 42'
+        self.assertEquals(c.maxlist, {frozenset(['b', 'e', 'I']): 42})
+
+        # Set incorrect values
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'maxlist', None)
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'maxlist', '')
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'maxlist', 'b:bleh')
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'maxlist', '#$(@*@')
+
+        # Setting chanmodes should restrict the possible values for
+        # maxlist.
+        c.chanmodes = 'beI,,,'
+        self.assertRaises(
+            scap.CapabilityLogicError, setattr, c, 'maxlist', 'be:100')
+        c.maxlist = 'b:100,eI:42'
+        self.assertEquals(c.maxlist, {frozenset(['b']): 100,
+                                      frozenset(['e', 'I']): 42})
+
+        # No deletion possible.
+        self.assertRaises(AttributeError, delattr, c, 'maxlist')

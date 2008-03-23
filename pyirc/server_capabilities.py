@@ -110,6 +110,9 @@ class ServerCapabilities(object):
                     self.excepts = self.excepts
                 if self.invex:
                     self.invex = self.invex
+                if self.maxlist:
+                    self.maxlist = ','.join('%s:%d' % (''.join(k), v)
+                                            for k,v in self.maxlist.iteritems())
             except CapabilityLogicError:
                 self._chanmodes = oldmodes
                 raise
@@ -199,3 +202,30 @@ class ServerCapabilities(object):
             self._kicklen = v
         return locals()
 
+    _maxlist = None
+    @_mkproperty('MAXLIST')
+    def maxlist():
+        def fset(self, v):
+            if not v:
+                raise CapabilityValueError('MAXLIST', v)
+            v = [l.split(':') for l in v.split(',')]
+            try:
+                v = dict((frozenset(iter(f)), int(l)) for f,l in v)
+            except ValueError:
+                raise CapabilityValueError('MAXLIST', v)
+
+            # If chanmodes has been set, verify that all A type flags
+            # are covered here.
+            chanmodes = self.chanmodes
+            if chanmodes:
+                max = set()
+                for flags in v.keys():
+                    max.update(flags)
+                if max != chanmodes[CHANMODE_LIST]:
+                    raise CapabilityLogicError(
+                        'MAXLIST set for flags "%s", but CHANMODES says '
+                        'there should be the following A type flags: "%s"' % (
+                        flags, chanmodes[CHANMODE_LIST]))
+
+            self._maxlist = v
+        return locals()
