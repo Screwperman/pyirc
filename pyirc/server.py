@@ -86,16 +86,9 @@ class Server(object):
 
     def handle_command(self, command):
         cmd = wireproto.decode(command)
-        print cmd.command
+        print cmd.command, cmd.args
         if cmd.command == 'MODE':
             self._conn.output(wireproto.encode('QUIT'))
 
     def handle_close(self):
         print "Done!"
-
-
-if __name__ == '__main__':
-    import sys
-    sys.argv[2] = int(sys.argv[2])
-    c = Connection(*sys.argv[1:])
-    asyncore.loop()
