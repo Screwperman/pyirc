@@ -28,7 +28,7 @@ class TestWireproto(unittest.TestCase):
             'PRIVMSG arg1 arg2 :arg3 with \xe2\x82\xac\r\n')
 
     def checkMessage(self, message, hostmask=None, nick=None, user=None,
-                     host=None, command=None, args=None):
+                     host=None, command=None, args=None, colon_arg=False):
         self.assert_(isinstance(message, wireproto.Message))
         self.assertEquals(message.hostmask, hostmask)
         self.assertEquals(message.nick, nick)
@@ -36,6 +36,7 @@ class TestWireproto(unittest.TestCase):
         self.assertEquals(message.host, host)
         self.assertEquals(message.command, command)
         self.assertEquals(message.args, args)
+        self.assertEquals(message.colon_arg, colon_arg)
 
     def testDecoding(self):
         """Test message decoding"""
@@ -44,15 +45,16 @@ class TestWireproto(unittest.TestCase):
             command='PRIVMSG', args=['foo', 'bar'])
         self.checkMessage(
             wireproto.decode('PRIVMSG foo :bar baz'),
-            command='PRIVMSG', args=['foo', 'bar baz'])
+            command='PRIVMSG', args=['foo', 'bar baz'], colon_arg=True)
         self.checkMessage(
             wireproto.decode(':irc.server.com 353 foo :bar baz'),
             hostmask='irc.server.com', host='irc.server.com',
-            command='353', args=['foo', 'bar baz'])
+            command='353', args=['foo', 'bar baz'], colon_arg=True)
         self.checkMessage(
             wireproto.decode(':Dave`!dave@natulte.net PRIVMSG #foo :Hi !'),
             hostmask='Dave`!dave@natulte.net', nick='Dave`', user='dave',
-            host='natulte.net', command='PRIVMSG', args=['#foo', 'Hi !'])
+            host='natulte.net', command='PRIVMSG', args=['#foo', 'Hi !'],
+            colon_arg=True)
 
 
 if __name__ == '__main__':

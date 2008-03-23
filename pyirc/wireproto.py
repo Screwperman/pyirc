@@ -33,6 +33,7 @@ class Message(object):
 
     command = None
     args = None
+    colon_arg = False
 
     def __init__(self, message):
         # Process the message prefix
@@ -49,6 +50,7 @@ class Message(object):
         # Locate the start of the final argument, if any, and split it
         # off. It is multispace and is annoying to process otherwise.
         message = message.split(' :', 1)
+        self.colon_arg = (len(message) > 1)
         message[:1] = message[0].strip().split()
         self.command, self.args = message[0], message[1:]
 
