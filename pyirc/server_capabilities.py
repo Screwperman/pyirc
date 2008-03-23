@@ -229,3 +229,16 @@ class ServerCapabilities(object):
 
             self._maxlist = v
         return locals()
+
+    _modes = 3
+    @_mkproperty('MODES', withdel=True)
+    def modes():
+        def fset(self, v):
+            v = v or None
+            if v is not None:
+                try:
+                    v = int(v)
+                except ValueError:
+                    raise CapabilityValueError('MODES', v)
+            self._modes = v
+        return locals()

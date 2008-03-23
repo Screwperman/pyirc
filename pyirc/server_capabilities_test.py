@@ -299,3 +299,27 @@ class TestServerCapabilities(unittest.TestCase):
 
         # No deletion possible.
         self.assertRaises(AttributeError, delattr, c, 'maxlist')
+
+    def testModes(self):
+        c = scap.ServerCapabilities()
+
+        # Default value
+        self.assertEquals(c.modes, 3)
+
+        # Setting no value
+        c.modes = None
+        self.assertEquals(c.modes, None)
+        c.modes = ''
+        self.assertEquals(c.modes, None)
+
+        # Setting an explicit value
+        c.modes = '5'
+        self.assertEquals(c.modes, 5)
+
+        # Setting an invalid value
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'modes', 'bleh')
+
+        # Deletion restores default
+        del c.modes
+        self.assertEquals(c.modes, 3)
