@@ -251,3 +251,16 @@ class ServerCapabilities(object):
                 raise CapabilityValueError('NETWORK', v)
             self._network = v
         return locals()
+
+    _nicklen = 9
+    @_mkproperty('NICKLEN', withdel=True)
+    def nicklen():
+        def fset(self, v):
+            try:
+                if not v:
+                    raise ValueError
+                v = int(v)
+            except ValueError:
+                raise CapabilityValueError('NICKLEN', v)
+            self._nicklen = v
+        return locals()

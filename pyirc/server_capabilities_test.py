@@ -344,3 +344,29 @@ class TestServerCapabilities(unittest.TestCase):
 
         # No deletion
         self.assertRaises(AttributeError, delattr, c, 'network')
+
+    def testNicklen(self):
+        c = scap.ServerCapabilities()
+
+        # Default value
+        self.assertEquals(c.nicklen, 9)
+
+        # Setting no value fails
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'nicklen', '')
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'nicklen', None)
+
+        # Setting integer values is cool
+        c.nicklen = 3
+        self.assertEquals(c.nicklen, 3)
+        c.nicklen = 32
+        self.assertEquals(c.nicklen, 32)
+
+        # Setting garbage values is not cool
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'nicklen', 'bleh')
+
+        # Deletion resets default
+        del c.nicklen
+        self.assertEquals(c.nicklen, 9)
