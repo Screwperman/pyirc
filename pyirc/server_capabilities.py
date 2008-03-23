@@ -113,6 +113,13 @@ class ServerCapabilities(object):
                 if self.maxlist:
                     self.maxlist = ','.join('%s:%d' % (''.join(k), v)
                                             for k,v in self.maxlist.iteritems())
+                if self.prefix:
+                    prefix_modes = set(self.prefix.keys())
+                    for modes in self._chanmodes.values():
+                        if prefix_modes.intersection(modes):
+                            raise CapabilityLogicError(
+                                'New CHANMODES definition overlaps modes '
+                                'defined by PREFIX')
             except CapabilityLogicError:
                 self._chanmodes = oldmodes
                 raise
@@ -263,4 +270,31 @@ class ServerCapabilities(object):
             except ValueError:
                 raise CapabilityValueError('NICKLEN', v)
             self._nicklen = v
+        return locals()
+
+    _prefix = {'o': '@', 'v': '+'}
+    @_mkproperty('PREFIX', withdel=True)
+    def prefix():
+        def fset(self, v):
+            v = v or {}
+            if v:
+                mapping = v[1:].split(')')
+                if (v[0] != '(' or
+                    len(mapping) != 2 or
+                    len(mapping[0]) != len(mapping[1])):
+                    raise CapabilityValueError('PREFIX', v)
+                v = dict(zip(iter(mapping[0]), iter(mapping[1])))
+
+            # Modes defined for prefixes should not be also defined
+            # as channel modes.
+            chanmodes = self.chanmodes
+            if chanmodes:
+                prefix_modes = set(v.keys())
+                for modes in chanmodes.values():
+                    if modes.intersection(prefix_modes):
+                        raise CapabilityLogicError(
+                            'User modes "%s" defined in PREFIX '
+                            'are also defined as CHANMODES' % prefix_modes)
+
+            self._prefix = v
         return locals()

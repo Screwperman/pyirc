@@ -137,6 +137,12 @@ class TestServerCapabilities(unittest.TestCase):
         self.assertRaises(
             scap.CapabilityLogicError, setattr, c, 'chanmodes', ',,,')
 
+        c = scap.ServerCapabilities()
+        c.chanmodes = 'ab,cd,ef,gi'
+        c.prefix = '(ohv)@%+'
+        self.assertRaises(
+            scap.CapabilityLogicError, setattr, c, 'chanmodes', 'ab,cd,ef,gh')
+
     def testChannellen(self):
         c = scap.ServerCapabilities()
 
@@ -370,3 +376,41 @@ class TestServerCapabilities(unittest.TestCase):
         # Deletion resets default
         del c.nicklen
         self.assertEquals(c.nicklen, 9)
+
+    def testPrefix(self):
+        c = scap.ServerCapabilities()
+
+        # Default value
+        self.assertEquals(c.prefix, {'o': '@', 'v': '+'})
+
+        # Setting no values clear all prefixes
+        c.prefix = None
+        self.assertEquals(c.prefix, {})
+        c.prefix = ''
+        self.assertEquals(c.prefix, {})
+        # Somewhat anal case, but possible in theory.
+        c.prefix = '()'
+        self.assertEquals(c.prefix, {})
+
+        # Setting values according to the syntax is cool
+        c.prefix = '(ab)$%'
+        self.assertEquals(c.prefix, {'a': '$', 'b': '%'})
+        c.prefix = '(ohv)@%+'
+        self.assertEquals(c.prefix, {'o': '@', 'h': '%', 'v': '+'})
+
+        # Syntax errors are not cool.
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'prefix', 'bleh')
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'prefix', 'bl)eh')
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'prefix', 'b(le)eh')
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'prefix', '(ble)eh')
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'prefix', '(bl)eeh')
+
+        # If chanmodes is defined, our modes are restricted.
+        c.chanmodes = 'ab,cd,ef,gi'
+        self.assertRaises(
+            scap.CapabilityLogicError, setattr, c, 'prefix', '(ae)%&')
