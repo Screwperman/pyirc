@@ -111,6 +111,17 @@ class TestServerCapabilities(unittest.TestCase):
         # Cannot delete chanmodes
         self.assertRaises(AttributeError, delattr, c, 'chanmodes')
 
+        # Check that all caps that depend on chanmodes values get
+        # rechecked on change.
+        c.excepts = 'a'
+        self.assertRaises(
+            scap.CapabilityLogicError, setattr, c, 'chanmodes', ',,,')
+        self.assertEquals(c.chanmodes,
+                          {scap.CHANMODE_LIST: frozenset(['a', 'b']),
+                           scap.CHANMODE_PARAM_ALWAYS: frozenset(['c', 'd']),
+                           scap.CHANMODE_PARAM_ADDONLY: frozenset(['e', 'f']),
+                           scap.CHANMODE_NO_PARAM: frozenset(['g', 'h'])})
+
     def testChannellen(self):
         c = scap.ServerCapabilities()
 
@@ -158,3 +169,31 @@ class TestServerCapabilities(unittest.TestCase):
         # Deleting resets to the default.
         del c.chantypes
         self.assertEquals(c.chantypes, frozenset(['#', '&']))
+
+    def testExcepts(self):
+        c = scap.ServerCapabilities()
+
+        # No default value
+        self.assertEquals(c.excepts, None)
+
+        # Set using the default channel flag
+        c.excepts = None
+        self.assertEquals(c.excepts, 'e')
+        c.excepts = ''
+        self.assertEquals(c.excepts, 'e')
+
+        # Set a custom flag
+        c.excepts = 'f'
+        self.assertEquals(c.excepts, 'f')
+
+        # Set a wonky flag
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'excepts', 'bleh')
+
+        # If chanmodes are set, the excepts flag must be an A type
+        # chanmode.
+        c.chanmodes = 'abf,,,'
+        self.assertRaises(
+            scap.CapabilityLogicError, setattr, c, 'excepts', 'e')
+        c.excepts = 'a'
+        self.assertEquals(c.excepts, 'a')

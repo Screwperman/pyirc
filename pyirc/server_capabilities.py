@@ -100,7 +100,18 @@ class ServerCapabilities(object):
                 raise CapabilityValueError('CHANMODES', v)
             # TODO(dave): Check that no flags from PREFIXES are here.
             # TODO(dave): Check for duplicates among fields.
+
+            oldmodes = self._chanmodes
             self._chanmodes = dict(enumerate(frozenset(iter(x)) for x in v))
+
+            # Check for broken dependent capabilities
+            try:
+                if self.excepts:
+                    self.excepts = self.excepts
+            except CapabilityLogicError:
+                self._chanmodes = oldmodes
+                raise
+
         return locals()
 
     _channellen = 200
@@ -134,4 +145,22 @@ class ServerCapabilities(object):
                             'specifies limits for prefix(es) "%s"' % (types,
                                                                       prefixes))
             self._chantypes = types
+        return locals()
+
+    _excepts = None
+    @_mkproperty('EXCEPTS', withdel=True)
+    def excepts():
+        def fset(self, v):
+            v = v or 'e'
+
+            if len(v) != 1:
+                raise CapabilityValueError('EXCEPTS', v)
+
+            # The except flag must be defined as an A type chanmode.
+            chanmodes = self.chanmodes
+            if chanmodes and v not in chanmodes[CHANMODE_LIST]:
+                raise CapabilityLogicError(
+                    'Channel flag "%s" defined for EXCEPTS, but not an A type '
+                    'channel flag according to CHANMODES' % v)
+            self._excepts = v
         return locals()
