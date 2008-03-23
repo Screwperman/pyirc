@@ -55,7 +55,3 @@ class TestWireproto(unittest.TestCase):
             hostmask='Dave`!dave@natulte.net', nick='Dave`', user='dave',
             host='natulte.net', command='PRIVMSG', args=['#foo', 'Hi !'],
             colon_arg=True)
-
-
-if __name__ == '__main__':
-    unittest.main()
