@@ -7,6 +7,7 @@ import wireproto
 
 class TestWireproto(unittest.TestCase):
     def testEncoding(self):
+        """Test message encoding"""
         self.assertEquals(
             wireproto.encode('notice'), 'NOTICE\r\n')
         # Single argument commands end up having two spaces between
@@ -37,6 +38,7 @@ class TestWireproto(unittest.TestCase):
         self.assertEquals(message.args, args)
 
     def testDecoding(self):
+        """Test message decoding"""
         self.checkMessage(
             wireproto.decode('PRIVMSG foo bar'),
             command='PRIVMSG', args=['foo', 'bar'])

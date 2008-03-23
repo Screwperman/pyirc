@@ -5,7 +5,7 @@
 import unittest
 from pmock import *
 
-import connection
+import server
 
 # Test cases.
 class TestServer(unittest.TestCase):
@@ -14,22 +14,22 @@ class TestServer(unittest.TestCase):
         self.d = Mock()
 
         # Inject a fresh mock to replace the wireproto module
-        connection.wireproto = self.w
+        server.wireproto = self.w
 
         def dispatcher_ctor(host, port, ext):
             self.assertEquals(host, 'host')
             self.assertEquals(port, 1234)
             return self.d
 
-        self.conn = connection.Server('host', 1234, 'nick', 'user',
-                                      'foo', _conn_class=dispatcher_ctor)
+        self.conn = server.Server('host', 1234, 'nick', 'user',
+                                  'foo', _conn_class=dispatcher_ctor)
 
     def tearDown(self):
         self.w.verify()
         self.d.verify()
 
-    def testConnectionSequence(self):
-        """Test that the Connection knows how to say hello to a server"""
+    def testServerSequence(self):
+        """Server connection sequence"""
         self.w.expects(once()).encode(eq('NICK'), eq('nick')).will(
             return_value(1))
         self.w.expects(once()).encode(
@@ -39,7 +39,7 @@ class TestServer(unittest.TestCase):
         self.d.expects(once()).output(eq(1))
         self.d.expects(once()).output(eq(2))
 
-        # We simulate the connection event from the dispatcher ourselves.
+        # We simulate the server event from the dispatcher ourselves.
         self.conn.handle_connect()
 
 
@@ -56,7 +56,7 @@ class Test_ConnectionDispatcher(unittest.TestCase):
 
         self.handler = Mock()
         self.handler.expects(once()).handle_connect()
-        self.dispatcher = connection._ConnectionDispatcher(
+        self.dispatcher = server._ConnectionDispatcher(
             '', 0, self.handler, ext_sock=self.sock)
         # Asyncore would call this handler on a real connect, but we
         # need to simulate it.
@@ -77,7 +77,7 @@ class Test_ConnectionDispatcher(unittest.TestCase):
         self.handler.expects(once()).handle_command(eq(cmd))
 
     def testDispatcherReadsMessages(self):
-        """Test that the dispatcher properly handles incoming data"""
+        """Dispatcher message reading"""
         self._sock_read('a\r\n')
         self._handle_command('a')
         self.dispatcher.handle_read()
@@ -98,7 +98,7 @@ class Test_ConnectionDispatcher(unittest.TestCase):
         self.dispatcher.handle_read()
 
     def testDispatcherWritesOutput(self):
-        """Test that the dispatcher properly handles outgoing data"""
+        """Dispatcher message writing"""
         # Again with the confusing reverse expectations. Read the
         # expectation setup in reverse order.
         self._sock_write('h', 1)
