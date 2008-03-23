@@ -121,6 +121,18 @@ class TestServerCapabilities(unittest.TestCase):
                            scap.CHANMODE_PARAM_ALWAYS: frozenset(['c', 'd']),
                            scap.CHANMODE_PARAM_ADDONLY: frozenset(['e', 'f']),
                            scap.CHANMODE_NO_PARAM: frozenset(['g', 'h'])})
+        del c.excepts
+
+        c.invex = 'b'
+        self.assertRaises(
+            scap.CapabilityLogicError, setattr, c, 'chanmodes', ',,,')
+        self.assertEquals(c.chanmodes,
+                          {scap.CHANMODE_LIST: frozenset(['a', 'b']),
+                           scap.CHANMODE_PARAM_ALWAYS: frozenset(['c', 'd']),
+                           scap.CHANMODE_PARAM_ADDONLY: frozenset(['e', 'f']),
+                           scap.CHANMODE_NO_PARAM: frozenset(['g', 'h'])})
+        del c.invex
+
 
     def testChannellen(self):
         c = scap.ServerCapabilities()
@@ -197,3 +209,54 @@ class TestServerCapabilities(unittest.TestCase):
             scap.CapabilityLogicError, setattr, c, 'excepts', 'e')
         c.excepts = 'a'
         self.assertEquals(c.excepts, 'a')
+
+    def testInvex(self):
+        c = scap.ServerCapabilities()
+
+        # No default value
+        self.assertEquals(c.invex, None)
+
+        # Set using the default channel flag
+        c.invex = None
+        self.assertEquals(c.invex, 'I')
+        c.invex = ''
+        self.assertEquals(c.invex, 'I')
+
+        # Set a custom flag
+        c.invex = 'X'
+        self.assertEquals(c.invex, 'X')
+
+        # Set a wonky flag
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'invex', 'bleh')
+
+        # If chanmodes are set, the invex flag must be an A type
+        # chanmode.
+        c.chanmodes = 'abX,,,'
+        self.assertRaises(
+            scap.CapabilityLogicError, setattr, c, 'invex', 'k')
+        c.excepts = 'a'
+        self.assertEquals(c.excepts, 'a')
+
+    def testKicklen(self):
+        c = scap.ServerCapabilities()
+
+        # No default value
+        self.assertEquals(c.kicklen, None)
+
+        # Set using the default value (no limit, same as default)
+        c.kicklen = None
+        self.assertEquals(c.kicklen, None)
+        c.kicklen = ''
+        self.assertEquals(c.kicklen, None)
+
+        # Set an explicit value
+        c.kicklen = '150'
+        self.assertEquals(c.kicklen, 150)
+
+        # Setting an invalid value fails.
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'kicklen', 'bleh')
+
+        # No default value, so no deletion possible.
+        self.assertRaises(AttributeError, delattr, c, 'kicklen')

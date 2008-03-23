@@ -108,6 +108,8 @@ class ServerCapabilities(object):
             try:
                 if self.excepts:
                     self.excepts = self.excepts
+                if self.invex:
+                    self.invex = self.invex
             except CapabilityLogicError:
                 self._chanmodes = oldmodes
                 raise
@@ -152,7 +154,6 @@ class ServerCapabilities(object):
     def excepts():
         def fset(self, v):
             v = v or 'e'
-
             if len(v) != 1:
                 raise CapabilityValueError('EXCEPTS', v)
 
@@ -164,3 +165,37 @@ class ServerCapabilities(object):
                     'channel flag according to CHANMODES' % v)
             self._excepts = v
         return locals()
+
+    # TODO(dave): Possibly implement IDCHAN, if anyone comes across an
+    # ircd that actually supports !chans.
+
+    _invex = None
+    @_mkproperty('INVEX', withdel=True)
+    def invex():
+        def fset(self, v):
+            v = v or 'I'
+            if len(v) != 1:
+                raise CapabilityValueError('INVEX', v)
+
+            # The invex flag must be defined as an A type chanmode.
+            chanmodes = self.chanmodes
+            if chanmodes and v not in chanmodes[CHANMODE_LIST]:
+                raise CapabilityLogicError(
+                    'Channel flag "%s" defined for INVEX, but not an A type '
+                    'channel flag according to CHANMODES' % v)
+            self._invex = v
+        return locals()
+
+    _kicklen = None
+    @_mkproperty('KICKLEN')
+    def kicklen():
+        def fset(self, v):
+            v = v or None
+            if v is not None:
+                try:
+                    v = int(v)
+                except ValueError:
+                    raise CapabilityValueError('KICKLEN', v)
+            self._kicklen = v
+        return locals()
+
