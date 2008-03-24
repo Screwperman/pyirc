@@ -414,3 +414,57 @@ class TestServerCapabilities(unittest.TestCase):
         c.chanmodes = 'ab,cd,ef,gi'
         self.assertRaises(
             scap.CapabilityLogicError, setattr, c, 'prefix', '(ae)%&')
+
+        # If STATUSMSG is defined, we cannot just change the prefix.
+        c = scap.ServerCapabilities()
+        c.statusmsg = '@+'
+        self.assertRaises(
+            scap.CapabilityLogicError, setattr, c, 'prefix', '(ae)%&')
+
+    def testSafelist(self):
+        c = scap.ServerCapabilities()
+
+        # Default value
+        self.assertEquals(c.safelist, False)
+
+        # Assignment of None succeeds (the caller's way of saying
+        # "just the directive, no value")
+        c.safelist = None
+        self.assertEquals(c.safelist, True)
+
+        # Assignment of other values fails
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'safelist', '')
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'safelist', 'true')
+
+        # Deletion reverts to the default
+        del c.safelist
+        self.assertEquals(c.safelist, False)
+
+    def testStatusmsg(self):
+        c = scap.ServerCapabilities()
+
+        # Default value
+        self.assertEquals(c.statusmsg, frozenset())
+
+        # Assignment to values defined by the default PREFIX is okay
+        c.statusmsg = '@+'
+        self.assertEquals(c.statusmsg, frozenset(['@', '+']))
+        c.statusmsg = '@'
+        self.assertEquals(c.statusmsg, frozenset(['@']))
+
+        # Assignment of values not defined in PREFIX fails
+        self.assertRaises(
+            scap.CapabilityLogicError, setattr, c, 'statusmsg', '%')
+
+        # Deletion reverts to the default
+        del c.statusmsg
+        self.assertEquals(c.statusmsg, frozenset())
+
+        # Altering PREFIX changes the restrictions for STATUSMSG
+        c.prefix = '(ohv)$%^'
+        c.statusmsg = '$'
+        self.assertEquals(c.statusmsg, frozenset(['$']))
+        self.assertRaises(
+            scap.CapabilityLogicError, setattr, c, 'statusmsg', '@')

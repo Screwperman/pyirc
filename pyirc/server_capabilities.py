@@ -299,5 +299,57 @@ class ServerCapabilities(object):
                             'User modes "%s" defined in PREFIX '
                             'are also defined as CHANMODES' % prefix_modes)
 
+            # Prefixes defined in STATUSMSG have to be present.
+            statusmsg = self.statusmsg
+            if not statusmsg.issubset(set(v.values())):
+                raise CapabilityLogicError(
+                    'User prefixes "%s" defined in STATUSMSG '
+                    'are not in the new PREFIX prefixes "%s"' % (
+                    ''.join(sorted(statusmsg)), ''.join(sorted(v))))
+
             self._prefix = v
         return locals()
+
+    _safelist = False
+    @_mkproperty('SAFELIST', withdel=True)
+    def safelist():
+        def fset(self, v):
+            if v is not None:
+                raise CapabilityValueError('SAFELIST', v)
+
+            self._safelist = True
+        return locals()
+
+    _statusmsg = frozenset()
+    @_mkproperty('STATUSMSG', withdel=True)
+    def statusmsg():
+        def fset(self, v):
+            v = frozenset(iter(v))
+
+            # STATUSMSG modes must match those in prefix
+            prefixes = self.prefix
+            if not prefixes:
+                raise CapabilityLogicError(
+                    'STATUSMSG correctness depends on definition of PREFIX, '
+                    'but PREFIX not defined')
+            prefixes = set(prefixes.values())
+            for prefix in v:
+                if prefix not in prefixes:
+                    raise CapabilityLogicError(
+                        'STATUSMSG prefix "%s" is not in PREFIX: "%s"' %(
+                        sorted(v), sorted(prefixes)))
+
+            # STATUSMSG prefixes cannot be the same as CHANTYPES prefixes.
+            chantypes = self.chantypes
+            if chantypes:
+                if chantypes.intersection(v):
+                    raise CapabilityLogicError(
+                        'STATUSMSG prefixes "%s" intersect with '
+                        'some prefixes defined by CHANTYPES.' % sorted(v))
+
+            self._statusmsg = v
+        return locals()
+
+    # TODO(dave): Maybe implement STD support one day, but it doesn't
+    # look like numeric 005 will ever become a standard.
+
