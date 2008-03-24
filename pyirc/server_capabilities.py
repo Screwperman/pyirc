@@ -11,6 +11,9 @@ def _mkproperty(capname, withdel=False):
     """
     def dec(func):
         d = func()
+        if not isinstance(d, dict):
+            raise RuntimeError('A decorated property is missing '
+                               'return locals() !')
         private_var = '_%s' % capname.lower()
         if 'fget' not in d:
             def default_fget(self):
