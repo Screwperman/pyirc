@@ -288,8 +288,8 @@ class ServerCapabilities(object):
                     raise CapabilityValueError('PREFIX', v)
                 v = dict(zip(iter(mapping[0]), iter(mapping[1])))
 
-            # Modes defined for prefixes should not be also defined
-            # as channel modes.
+            # Modes defined in PREFIX should not be also defined in
+            # CHANMODES.
             chanmodes = self.chanmodes
             if chanmodes:
                 prefix_modes = set(v.keys())
