@@ -468,3 +468,40 @@ class TestServerCapabilities(unittest.TestCase):
         self.assertEquals(c.statusmsg, frozenset(['$']))
         self.assertRaises(
             scap.CapabilityLogicError, setattr, c, 'statusmsg', '@')
+
+    def testTargmax(self):
+        c = scap.ServerCapabilities()
+
+        # Default is no value
+        self.assertEquals(c.targmax, {})
+
+        # Setting simple values works
+        c.targmax = 'PRIVMSG:42'
+        self.assertEquals(c.targmax, {'PRIVMSG': 42})
+
+        c.targmax = 'PRIVMSG:4,NOTICE:3,KICK:42'
+        self.assertEquals(c.targmax,
+                          {'PRIVMSG': 4,
+                           'NOTICE': 3,
+                           'KICK': 42})
+
+        # Setting more complex values also works
+        c.targmax = 'PRIVMSG:3,NOTICE:,KICK:5'
+        self.assertEquals(c.targmax,
+                          {'PRIVMSG': 3,
+                           'NOTICE': 1000,
+                           'KICK': 5})
+
+        # Setting None resets to default
+        c.targmax = ''
+        self.assertEquals(c.targmax, {})
+        c.targmax = None
+        self.assertEquals(c.targmax, {})
+
+        # Setting borked values fails
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'targmax', 'bleh')
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'targmax', 'PRIVMSG:4,bleh')
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'targmax', 'PRIVMSG:4,KICK')

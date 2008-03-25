@@ -353,3 +353,20 @@ class ServerCapabilities(object):
     # TODO(dave): Maybe implement STD support one day, but it doesn't
     # look like numeric 005 will ever become a standard.
 
+    _targmax = {}
+    @_mkproperty('TARGMAX', withdel=True)
+    def targmax():
+        def fset(self, v):
+            if not v:
+                self._targmax = {}
+                return
+            try:
+                targmax = (x.split(':') for x in v.split(','))
+                # Technically, 1000 is wrong here. The absence of
+                # value means infinity, but for all practical purposes
+                # 1000 is large enough in this case.
+                targmax = dict((x, int(y or 1000)) for x,y in targmax)
+            except ValueError:
+                raise CapabilityValueError('TARGMAX', v)
+            self._targmax = targmax
+        return locals()
