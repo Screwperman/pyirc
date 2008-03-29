@@ -28,11 +28,11 @@ class _ConnectionDispatcher(asyncore.dispatcher):
         self.send_buffer.append(data)
 
     def handle_connect(self):
-        self.ext_handler.handle_connect()
+        self.ext_handler._handle_connect()
 
     def handle_close(self):
         self.close()
-        self.ext_handler.handle_close()
+        self.ext_handler._handle_close()
 
     def handle_read(self):
         data = self.recv(8192)
@@ -53,9 +53,9 @@ class _ConnectionDispatcher(asyncore.dispatcher):
             return
 
         self.recv_buffer.append(lines[0])
-        self.ext_handler.handle_command(''.join(self.recv_buffer))
+        self.ext_handler._handle_command(''.join(self.recv_buffer))
         for line in lines[1:-1]:
-            self.ext_handler.handle_command(line)
+            self.ext_handler._handle_command(line)
         self.recv_buffer = [lines[-1]]
 
     def writable(self):
@@ -79,16 +79,16 @@ class Server(object):
         self.user = user
         self.realname = realname
 
-    def handle_connect(self):
+    def _handle_connect(self):
         self._conn.output(wireproto.encode('NICK', self.nick))
         self._conn.output(wireproto.encode(
             'USER', self.user, '0', '*', self.realname))
 
-    def handle_command(self, command):
+    def _handle_command(self, command):
         cmd = wireproto.decode(command)
         print cmd.command, cmd.args
         if cmd.command == 'MODE':
             self._conn.output(wireproto.encode('QUIT'))
 
-    def handle_close(self):
+    def _handle_close(self):
         print "Done!"

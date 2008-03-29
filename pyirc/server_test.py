@@ -40,7 +40,7 @@ class TestServer(unittest.TestCase):
         self.d.expects(once()).output(eq(2))
 
         # We simulate the server event from the dispatcher ourselves.
-        self.conn.handle_connect()
+        self.conn._handle_connect()
 
 
 class Test_ConnectionDispatcher(unittest.TestCase):
@@ -55,7 +55,7 @@ class Test_ConnectionDispatcher(unittest.TestCase):
         self.sock.expects(once()).getpeername()
 
         self.handler = Mock()
-        self.handler.expects(once()).handle_connect()
+        self.handler.expects(once())._handle_connect()
         self.dispatcher = server._ConnectionDispatcher(
             '', 0, self.handler, ext_sock=self.sock)
         # Asyncore would call this handler on a real connect, but we
@@ -74,7 +74,7 @@ class Test_ConnectionDispatcher(unittest.TestCase):
             return_value(amount_written))
 
     def _handle_command(self, cmd):
-        self.handler.expects(once()).handle_command(eq(cmd))
+        self.handler.expects(once())._handle_command(eq(cmd))
 
     def testDispatcherReadsMessages(self):
         """Dispatcher message reading"""
