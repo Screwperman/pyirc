@@ -66,6 +66,7 @@ class TestServerCapabilities(unittest.TestCase):
         self.assertRaises(AttributeError, delattr, c, 'chanlimit')
 
     def testChanmodes(self):
+        """CHANMODES capability semantics"""
         c = scap.ServerCapabilities()
 
         # No default
@@ -144,6 +145,7 @@ class TestServerCapabilities(unittest.TestCase):
             scap.CapabilityLogicError, setattr, c, 'chanmodes', 'ab,cd,ef,gh')
 
     def testChannellen(self):
+        """CHANELLEN capability semantics"""
         c = scap.ServerCapabilities()
 
         # Default value
@@ -166,6 +168,7 @@ class TestServerCapabilities(unittest.TestCase):
         self.assertEquals(c.channellen, 200)
 
     def testChantypes(self):
+        """CHANTYPES capability semantics"""
         c = scap.ServerCapabilities()
 
         # Default value
@@ -192,6 +195,7 @@ class TestServerCapabilities(unittest.TestCase):
         self.assertEquals(c.chantypes, frozenset(['#', '&']))
 
     def testExcepts(self):
+        """EXCEPTS capability semantics"""
         c = scap.ServerCapabilities()
 
         # No default value
@@ -220,6 +224,7 @@ class TestServerCapabilities(unittest.TestCase):
         self.assertEquals(c.excepts, 'a')
 
     def testInvex(self):
+        """INVEX capability semantics"""
         c = scap.ServerCapabilities()
 
         # No default value
@@ -248,6 +253,7 @@ class TestServerCapabilities(unittest.TestCase):
         self.assertEquals(c.excepts, 'a')
 
     def testKicklen(self):
+        """KICKLEN capability semantics"""
         c = scap.ServerCapabilities()
 
         # No default value
@@ -271,6 +277,7 @@ class TestServerCapabilities(unittest.TestCase):
         self.assertRaises(AttributeError, delattr, c, 'kicklen')
 
     def testMaxlist(self):
+        """MAXLIST capability semantics"""
         c = scap.ServerCapabilities()
 
         # No default value
@@ -307,6 +314,7 @@ class TestServerCapabilities(unittest.TestCase):
         self.assertRaises(AttributeError, delattr, c, 'maxlist')
 
     def testModes(self):
+        """MODES capability semantics"""
         c = scap.ServerCapabilities()
 
         # Default value
@@ -331,6 +339,7 @@ class TestServerCapabilities(unittest.TestCase):
         self.assertEquals(c.modes, 3)
 
     def testNetwork(self):
+        """NETWORK capability semantics"""
         c = scap.ServerCapabilities()
 
         # No default value
@@ -352,6 +361,7 @@ class TestServerCapabilities(unittest.TestCase):
         self.assertRaises(AttributeError, delattr, c, 'network')
 
     def testNicklen(self):
+        """NICKLEN capability semantics"""
         c = scap.ServerCapabilities()
 
         # Default value
@@ -378,6 +388,7 @@ class TestServerCapabilities(unittest.TestCase):
         self.assertEquals(c.nicklen, 9)
 
     def testPrefix(self):
+        """PREFIX capability semantics"""
         c = scap.ServerCapabilities()
 
         # Default value
@@ -422,6 +433,7 @@ class TestServerCapabilities(unittest.TestCase):
             scap.CapabilityLogicError, setattr, c, 'prefix', '(ae)%&')
 
     def testSafelist(self):
+        """SAFELIST capability semantics"""
         c = scap.ServerCapabilities()
 
         # Default value
@@ -443,6 +455,7 @@ class TestServerCapabilities(unittest.TestCase):
         self.assertEquals(c.safelist, False)
 
     def testStatusmsg(self):
+        """STATUSMSG capability semantics"""
         c = scap.ServerCapabilities()
 
         # Default value
@@ -470,6 +483,7 @@ class TestServerCapabilities(unittest.TestCase):
             scap.CapabilityLogicError, setattr, c, 'statusmsg', '@')
 
     def testTargmax(self):
+        """TARGMAX capability semantics"""
         c = scap.ServerCapabilities()
 
         # Default is no value
