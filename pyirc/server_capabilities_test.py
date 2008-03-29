@@ -505,3 +505,32 @@ class TestServerCapabilities(unittest.TestCase):
             scap.CapabilityValueError, setattr, c, 'targmax', 'PRIVMSG:4,bleh')
         self.assertRaises(
             scap.CapabilityValueError, setattr, c, 'targmax', 'PRIVMSG:4,KICK')
+
+    def testTopiclen(self):
+        """TOPICLEN capability semantics"""
+        c = scap.ServerCapabilities()
+
+        c = scap.ServerCapabilities()
+
+        # No default value
+        self.assertEquals(c.topiclen, None)
+
+        # Setting no value is cool
+        c.topiclen = None
+        self.assertEquals(c.topiclen, None)
+        c.topiclen = ''
+        self.assertEquals(c.topiclen, None)
+
+        # Setting integer values is cool
+        c.topiclen = 42
+        self.assertEquals(c.topiclen, 42)
+        c.topiclen = 32
+        self.assertEquals(c.topiclen, 32)
+
+        # Setting garbage values is not cool
+        self.assertRaises(
+            scap.CapabilityValueError, setattr, c, 'topiclen', 'bleh')
+
+        # Deletion resets default
+        del c.topiclen
+        self.assertEquals(c.topiclen, None)

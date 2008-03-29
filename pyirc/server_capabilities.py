@@ -370,3 +370,16 @@ class ServerCapabilities(object):
                 raise CapabilityValueError('TARGMAX', v)
             self._targmax = targmax
         return locals()
+
+    _topiclen = None
+    @_mkproperty('TOPICLEN', withdel=True)
+    def topiclen():
+        def fset(self, v):
+            v = v or None
+            if v is not None:
+                try:
+                    v = int(v)
+                except ValueError:
+                    raise CapabilityValueError('KICKLEN', v)
+            self._topiclen = v
+        return locals()
