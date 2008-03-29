@@ -154,7 +154,7 @@ class ServerCapabilities(object):
             chanlimit = self.chanlimit
             if chanlimit:
                 for prefixes in chanlimit.keys():
-                    if prefixes not in types:
+                    if not prefixes.issubset(types):
                         raise CapabilityLogicError(
                             'Channel types redefined to "%s", but CHANLIMIT '
                             'specifies limits for prefix(es) "%s"' % (types,
