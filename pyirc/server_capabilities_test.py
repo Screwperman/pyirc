@@ -548,3 +548,33 @@ class TestServerCapabilities(unittest.TestCase):
         # Deletion resets default
         del c.topiclen
         self.assertEquals(c.topiclen, None)
+
+    def testCapabilitySetting(self):
+        """Capability setting helpers"""
+        c = scap.ServerCapabilities()
+
+        c.setCapability('TOPICLEN=42')
+        self.assertEquals(c.topiclen, 42)
+
+        c.setCapability('INVEX')
+        self.assertEquals(c.invex, 'I')
+
+        c.setCapability('TOPICLEN=')
+        self.assertEquals(c.topiclen, None)
+
+        c.setCapabilities('TOPICLEN=42 INVEX=U EXCEPTS')
+        self.assertEquals(c.topiclen, 42)
+        self.assertEquals(c.invex, 'U')
+        self.assertEquals(c.excepts, 'e')
+
+        # This one tests ordering: the latter fields depend on the
+        # values configured by the former.
+        c.setCapabilities('CHANTYPES=@%& CHANLIMIT=@%:42,&:5')
+        self.assertEquals(c.chantypes, frozenset(['@', '%', '&']))
+        self.assertEquals(c.chanlimit, {frozenset(['@','%']): 42,
+                                        frozenset(['&']): 5})
+
+        c = scap.ServerCapabilities()
+        self.assertRaises(scap.CapabilityLogicError,
+                          c.setCapabilities,
+                          'CHANLIMIT=@%:42,&:5 CHANTYPES=@%&')

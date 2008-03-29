@@ -383,3 +383,25 @@ class ServerCapabilities(object):
                     raise CapabilityValueError('KICKLEN', v)
             self._topiclen = v
         return locals()
+
+    #
+    # Helpers to set capabilities from an RPL_ISUPPORT formatted
+    # string
+    #
+    def setCapability(self, cap_str):
+        """Set a single capability specified in ISUPPORT format.
+
+        Example: TOPICLEN=5
+        """
+        cap = cap_str.split('=', 1)
+        if len(cap) == 1:
+            cap.append(None)
+        setattr(self, cap[0].lower(), cap[1])
+
+    def setCapabilities(self, caps_str):
+        """Set many capabilities specified in ISUPPORT format.
+
+        Example: INVEX KICKLEN=4 TOPICLEN=42
+        """
+        for cap in caps_str.split(' '):
+            self.setCapability(cap)
