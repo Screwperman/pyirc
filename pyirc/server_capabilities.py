@@ -398,10 +398,13 @@ class ServerCapabilities(object):
             cap.append(None)
         setattr(self, cap[0].lower(), cap[1])
 
-    def setCapabilities(self, caps_str):
-        """Set many capabilities specified in ISUPPORT format.
-
-        Example: INVEX KICKLEN=4 TOPICLEN=42
-        """
-        for cap in caps_str.split(' '):
-            self.setCapability(cap)
+    def handle_isupport(self, cmd):
+        print 'CAPS: %s' % ' '.join(cmd.args)
+        for cap in cmd.args[1:-1]:
+            try:
+                self.setCapability(cap)
+                print 'Set %s' % cap
+            except CapabilityValueError:
+                print 'Value error: %s' % cap
+            except CapabilityLogicError:
+                print 'Logic error: %s' % cap

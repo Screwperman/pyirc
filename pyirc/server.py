@@ -6,6 +6,7 @@ import socket
 import asyncore
 
 import wireproto
+import server_capabilities
 
 class _ConnectionDispatcher(asyncore.dispatcher):
     """Thin wrapper around asyncore.dispatcher.
@@ -79,6 +80,10 @@ class Server(object):
         self.user = user
         self.realname = realname
 
+        self.capabilities = server_capabilities.ServerCapabilities()
+
+        self._command_handlers = {'005': self.capabilities.handle_isupport}
+
     def _handle_connect(self):
         self._conn.output(wireproto.encode('NICK', self.nick))
         self._conn.output(wireproto.encode(
@@ -86,8 +91,11 @@ class Server(object):
 
     def _handle_command(self, command):
         cmd = wireproto.decode(command)
-        print cmd.command, cmd.args
-        if cmd.command == 'MODE':
+        if cmd.command in self._command_handlers:
+            self._command_handlers[cmd.command](cmd)
+        else:
+            print 'Ignored %s' % cmd.command
+        if cmd.command == '376':
             self._conn.output(wireproto.encode('QUIT'))
 
     def _handle_close(self):

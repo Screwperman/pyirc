@@ -52,7 +52,7 @@ class Message(object):
         message = message.split(' :', 1)
         self.colon_arg = (len(message) > 1)
         message[:1] = message[0].strip().split()
-        self.command, self.args = message[0], message[1:]
+        self.command, self.args = message[0].upper(), message[1:]
 
 def decode(message):
     return Message(message)
